@@ -328,7 +328,6 @@ export default function LostWritePage() {
           {/* ===== 고양이 정보 섹션 ===== */}
           <div className="mb-8 bg-white border border-black/[0.06] rounded-[24px] p-6">
             <h3 className="text-[14px] font-semibold mb-5 flex items-center gap-2">
-              <span className="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center text-red-500 text-[10px] font-bold">!</span>
               고양이 정보 <span className="font-normal opacity-40">(선택)</span>
             </h3>
 
