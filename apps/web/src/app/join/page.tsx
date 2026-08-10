@@ -116,8 +116,8 @@ export default function JoinPage() {
     setIsLoading(true);
     try {
       await join(formData);
-      // 회원가입 성공 → 로그인 페이지로 이동
-      router.push('/login');
+      // 회원가입 성공 → 환영 페이지로 이동
+      router.push(`/join/welcome?id=${encodeURIComponent(formData.loginId)}`);
     } catch (err) {
       setServerError(err instanceof Error ? err.message : '회원가입에 실패했습니다.');
     } finally {
