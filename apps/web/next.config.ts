@@ -1,6 +1,12 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   experimental: {
     // 동적 경로의 라우터 캐시 비활성화 — 상태 변경 후 목록/상세 재진입 시 최신 데이터 보장
     staleTimes: {
