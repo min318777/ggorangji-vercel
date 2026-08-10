@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import StatusBar from '@/components/common/StatusBar';
 import {
   getLostPosts,
   getNearbyLostPosts,
@@ -636,7 +635,6 @@ export default function LostPage() {
         )}
 
       </div>
-      <StatusBar text="GEO_LOCATION_ACTIVE // CLUSTER_SEOUL_CORE" />
     </div>
   );
 }

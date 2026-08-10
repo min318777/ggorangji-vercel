@@ -2,7 +2,6 @@
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import StatusBar from '@/components/common/StatusBar';
 import { Suspense } from 'react';
 
 function WelcomeContent() {
@@ -64,7 +63,6 @@ function WelcomeContent() {
         </div>
       </div>
 
-      <StatusBar text="SECURE_AUTH_NODE // ACTIVE" />
     </div>
   );
 }

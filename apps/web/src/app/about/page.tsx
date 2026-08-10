@@ -1,5 +1,3 @@
-import StatusBar from '@/components/common/StatusBar';
-
 export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -39,7 +37,6 @@ export default function AboutPage() {
 
       </div>
 
-      <StatusBar text="AUTH_SERVICE_READY // PROD_NODE_04" />
     </div>
   );
 }

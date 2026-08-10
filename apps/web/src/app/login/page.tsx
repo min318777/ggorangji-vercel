@@ -3,7 +3,6 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import StatusBar from '@/components/common/StatusBar';
 import { login } from '@/lib/api/auth';
 
 export default function LoginPage() {
@@ -120,7 +119,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <StatusBar text="SECURE_AUTH_NODE // ACTIVE" />
     </div>
   );
 }

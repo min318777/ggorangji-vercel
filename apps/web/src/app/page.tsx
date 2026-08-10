@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import StatusBar from '@/components/common/StatusBar';
 
 // 게시글 카드 데이터
 const POST_CARDS = [
@@ -271,7 +270,6 @@ export default function HomePage() {
 
       </div>
 
-      <StatusBar text="SPRING_BOOT_CONNECTED // PROD_NODE_04" />
     </main>
   );
 }

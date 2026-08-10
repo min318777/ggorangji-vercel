@@ -3,7 +3,6 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import StatusBar from '@/components/common/StatusBar';
 import { join, checkLoginId, checkNickname } from '@/lib/api/auth';
 
 // 폼 필드 타입 정의
@@ -286,7 +285,6 @@ export default function JoinPage() {
         </div>
       </div>
 
-      <StatusBar text="AUTH_SERVICE_READY // PROD_NODE_04" />
     </div>
   );
 }

@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import StatusBar from '@/components/common/StatusBar';
 import { getBoastPosts, getPopularBoastPosts, searchByFts, searchByLike, type BoastPostItem } from '@/lib/api/posts';
 
 function formatDate(dateStr: string): string {
@@ -441,7 +440,6 @@ export default function BoastPage() {
 
       </div>
 
-      <StatusBar text="SPRING_BOOT_CONNECTED // PROD_NODE_04" />
     </div>
   );
 }
