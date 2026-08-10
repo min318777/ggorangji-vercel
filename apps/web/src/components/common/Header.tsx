@@ -299,9 +299,14 @@ export default function Header() {
     router.push(path);
   }, [router]);
 
-  // 알림 화면에서 숨기기 (DB 변경 없음)
-  const handleDismiss = useCallback((id: number) => {
+  // 알림 읽음 처리 후 목록에서 제거
+  const handleDismiss = useCallback(async (id: number) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
+    try {
+      await markAsRead(id);
+    } catch {
+      /* 조용히 실패 */
+    }
   }, []);
 
   // 전체 읽음
