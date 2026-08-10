@@ -39,6 +39,8 @@ export function useNotificationSSE({ isLoggedIn, onNotification }: UseNotificati
         });
 
         if (!res.ok || !res.body) {
+          // 401은 토큰 만료 — 재연결해도 의미없으므로 중단
+          if (res.status === 401) return;
           scheduleReconnect();
           return;
         }

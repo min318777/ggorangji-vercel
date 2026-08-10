@@ -4,7 +4,7 @@ import './globals.css';
 import ClientLayout from '@/components/common/ClientLayout';
 
 export const metadata: Metadata = {
-  title: 'petie — Premium Cat Social Collective',
+  title: '꼬랑지',
   description: '반려동물과의 소중한 순간을 공유하고 실종 가족을 함께 찾는 프리미엄 소셜 플랫폼',
 };
 
