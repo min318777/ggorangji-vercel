@@ -230,7 +230,7 @@ export default function Header() {
     }
     getNotifications(0, 10)
       .then((data) => {
-        setNotifications(data.content);
+        setNotifications(data.content.filter((n) => !n.isRead));
         setNotisLoaded(true);
       })
       .catch(() => {});
@@ -272,7 +272,7 @@ export default function Header() {
       setIsLoadingNotis(true);
       try {
         const data = await getNotifications(0, 10);
-        setNotifications(data.content);
+        setNotifications(data.content.filter((n) => !n.isRead));
         setNotisLoaded(true);
       } catch {
         /* 조용히 실패 */
