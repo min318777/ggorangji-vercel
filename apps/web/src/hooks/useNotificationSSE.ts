@@ -71,8 +71,8 @@ export function useNotificationSSE({ isLoggedIn, onNotification }: UseNotificati
               if (line.startsWith('data:')) dataLine = line.slice(5).trim();
             }
 
-            // 이벤트 ID 갱신 (heartbeat, connect 제외한 실제 알림만)
-            if (eventId && eventName === 'notification') lastEventId = eventId;
+            // 이벤트 ID 갱신 (heartbeat 제외) — connect 이벤트 id는 lastEventId 초기값으로 사용
+            if (eventId && eventName !== 'heartbeat') lastEventId = eventId;
 
             // heartbeat/connect 이벤트 무시
             if (eventName === 'heartbeat' || eventName === 'connect') continue;
