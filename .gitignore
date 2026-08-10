@@ -1,0 +1,23 @@
+# 의존성
+node_modules
+.pnp
+.pnp.js
+
+# Next.js 빌드 결과물
+.next/
+out/
+build
+
+# 환경변수 (민감 정보)
+.env*.local
+.env.local
+
+# 기타
+.DS_Store
+*.pem
+npm-debug.log*
+*.tsbuildinfo
+next-env.d.ts
+
+# Turborepo
+.turbo

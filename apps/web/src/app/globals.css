@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== 전역 기본 스타일 ===== */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  color: #1A1A1A;
+  background-color: #FFFFFF;
+  min-height: 100vh;
+}
+
+/* ===== 커스텀 유틸리티 ===== */
+@layer utilities {
+  /* 글래스모피즘 카드 */
+  .glass {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+  }
+
+  /* 더 불투명한 글래스 (회원가입 카드 등) */
+  .glass-solid {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+  }
+}
