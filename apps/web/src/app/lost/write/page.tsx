@@ -109,7 +109,6 @@ export default function LostWritePage() {
     if (!title.trim()) return '제목을 입력해 주세요.';
     if (title.trim().length < 2) return '제목은 2자 이상 입력해 주세요.';
     if (title.trim().length > 100) return '제목은 100자 이하로 입력해 주세요.';
-    if (!catName.trim()) return '고양이 이름을 입력해 주세요.';
     if (!lostLocation.trim()) return '실종 위치를 입력해 주세요.';
     if (!content.trim()) return '상세 내용을 입력해 주세요.';
     if (content.trim().length < 2) return '내용은 2자 이상 입력해 주세요.';
@@ -336,7 +335,7 @@ export default function LostWritePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* 이름 */}
               <div>
-                <label className="block text-[12px] font-semibold text-charcoal/60 mb-2">이름 <span className="text-red-500">*</span></label>
+                <label className="block text-[12px] font-semibold text-charcoal/60 mb-2">이름 <span className="font-normal opacity-40">(선택)</span></label>
                 <input
                   type="text"
                   value={catName}
