@@ -18,7 +18,7 @@ interface FormData {
 const FIELDS = [
   { field: 'loginId',         label: '로그인 ID',     placeholder: '5~20자 영문/숫자',                  type: 'text' },
   { field: 'nickname',        label: '닉네임',         placeholder: '2~10자 한글/영문/숫자 (예: 김냥이123)',  type: 'text' },
-  { field: 'password',        label: '비밀번호',       placeholder: '영문+숫자 필수 포함',                  type: 'password' },
+  { field: 'password',        label: '비밀번호',       placeholder: '영문/숫자 8자 이상',                   type: 'password' },
   { field: 'passwordConfirm', label: '비밀번호 확인',  placeholder: '비밀번호를 다시 입력해주세요',           type: 'password' },
 ] as const;
 
@@ -94,8 +94,10 @@ export default function JoinPage() {
     } else if (nicknameCheckResult !== true) {
       newErrors.nickname = '닉네임 중복 확인을 완료해주세요.';
     }
-    if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]+$/.test(formData.password)) {
-      newErrors.password = '영문과 숫자를 반드시 포함해야 합니다.';
+    if (formData.password.length < 8 || formData.password.length > 100) {
+      newErrors.password = '비밀번호는 8자 이상 100자 이하로 입력해 주세요.';
+    } else if (!/^[a-zA-Z0-9]+$/.test(formData.password)) {
+      newErrors.password = '비밀번호는 영문과 숫자만 사용 가능합니다.';
     }
     if (formData.password !== formData.passwordConfirm) {
       newErrors.passwordConfirm = '비밀번호가 일치하지 않습니다.';
