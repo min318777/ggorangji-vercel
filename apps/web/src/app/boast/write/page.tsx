@@ -253,13 +253,17 @@ export default function BoastWritePage() {
             {/* 이미지 미리보기 그리드 */}
             {images.length > 0 && (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-3">
-                {images.map((img) => (
+                {images.map((img, i) => (
                   <div key={img.id} className="relative aspect-square rounded-[16px] overflow-hidden group">
                     <img
                       src={img.previewUrl}
                       alt="미리보기"
                       className="w-full h-full object-cover"
                     />
+                    {/* 썸네일 뱃지 */}
+                    {i === 0 && (
+                      <div className="absolute top-1.5 left-1.5 bg-brand text-white text-[9px] px-1.5 py-0.5 rounded-full font-semibold">썸네일</div>
+                    )}
                     {/* 제거 버튼 */}
                     <button
                       type="button"

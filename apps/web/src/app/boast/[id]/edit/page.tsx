@@ -266,11 +266,15 @@ export default function BoastEditPage({ params }: { params: Promise<{ id: string
             {(existingUrls.length > 0 || newImages.length > 0) && (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-3">
                 {/* 기존 이미지 */}
-                {existingUrls.map((url) => {
+                {existingUrls.map((url, i) => {
                   const isDeleted = deletedUrls.includes(url);
+                  const isThumbnail = i === 0;
                   return (
                     <div key={url} className="relative aspect-square rounded-[16px] overflow-hidden group">
                       <img src={url} alt="기존 이미지" className={`w-full h-full object-cover transition-opacity ${isDeleted ? 'opacity-40' : 'opacity-100'}`} />
+                      {isThumbnail && !isDeleted && (
+                        <div className="absolute top-1.5 left-1.5 bg-brand text-white text-[9px] px-1.5 py-0.5 rounded-full font-semibold">썸네일</div>
+                      )}
                       {isDeleted && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                           <span className="text-white text-[10px] font-bold">삭제 예정</span>
