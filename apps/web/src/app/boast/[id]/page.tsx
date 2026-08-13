@@ -180,10 +180,10 @@ function Gallery({ imageUrls }: { imageUrls: string[] }) {
 
       {/* 썸네일 스트립 */}
       {hasMultiple && (
-        <div className="grid grid-cols-4 gap-2 mt-3">
+        <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide">
           {imageUrls.map((url, i) => (
             <button key={i} type="button" onClick={() => setCurrent(i)}
-              className={`relative aspect-square overflow-hidden rounded-[12px] cursor-pointer transition-all duration-200 border-none p-0 ${
+              className={`relative flex-shrink-0 w-16 h-16 overflow-hidden rounded-[12px] cursor-pointer transition-all duration-200 border-none p-0 ${
                 i === current ? 'ring-2 ring-brand ring-offset-2' : 'opacity-70 hover:opacity-100'
               }`}>
               <img src={url} alt={`썸네일 ${i + 1}`} className="w-full h-full object-cover block" />
