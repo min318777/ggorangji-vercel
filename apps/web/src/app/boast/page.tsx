@@ -5,6 +5,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getBoastPosts, getPopularBoastPosts, searchByFts, searchByLike, type BoastPostItem } from '@/lib/api/posts';
 
+// 목록으로 돌아올 때 Router Cache(static 세그먼트, 기본 5분)를 타지 않고 항상 리마운트되어
+// useEffect가 재실행되도록 강제 — 조회수/좋아요 등 최신 데이터 반영 보장
+export const dynamic = 'force-dynamic';
+
 function formatDate(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60_000);
