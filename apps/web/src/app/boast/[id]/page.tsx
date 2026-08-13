@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  getBoastPost,
+  getBoastPostWithView,
   getBoastComments,
   postBoastComment,
   deleteComment,
@@ -464,27 +464,15 @@ export default function BoastDetailPage({ params }: { params: Promise<{ id: stri
     setIsAdmin(localStorage.getItem('role') === 'ROLE_ADMIN');
   }, []);
 
-  // 게시글 조회 + 조회수 증가 (StrictMode 이중 호출 방지)
+  // 게시글 조회 + 조회수 증가 통합 API 호출 (StrictMode 이중 호출 방지)
   useEffect(() => {
+    if (viewIncremented.current) return;
+    viewIncremented.current = true;
     (async () => {
       try {
-        const data = await getBoastPost(postId);
+        const data = await getBoastPostWithView(postId);
         setPost(data);
         setLikeCount(data.likeCount);
-        if (!viewIncremented.current) {
-          viewIncremented.current = true;
-          // 통합 API: 상세조회 + 조회수 증가 (GET /view/v3/{id})
-          fetch(
-            `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'}/api/meow/boast-cat/view/v3/${postId}`
-          )
-            .then(res => res.json())
-            .then(json => {
-              if (json.data != null) {
-                setPost(prev => prev ? { ...prev, view: prev.view + 1 } : prev);
-              }
-            })
-            .catch(() => {});
-        }
       } catch (e) {
         setPostError(e instanceof Error ? e.message : '게시글을 불러오지 못했습니다.');
       } finally {

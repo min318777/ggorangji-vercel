@@ -115,6 +115,16 @@ export async function getBoastPost(id: number): Promise<BoastPostDetail> {
   return json.data;
 }
 
+// 자랑글 상세 조회 + 조회수 증가 통합 — GET /api/meow/boast-cat/view/v3/{id}
+export async function getBoastPostWithView(id: number): Promise<BoastPostDetail> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'}/api/meow/boast-cat/view/v3/${id}`
+  );
+  if (!res.ok) throw new Error('게시글을 불러오지 못했습니다.');
+  const json: ApiResponse<BoastPostDetail> = await res.json();
+  return json.data;
+}
+
 // ===== 댓글 응답 DTO =====
 export interface CommentItem {
   id: number;
