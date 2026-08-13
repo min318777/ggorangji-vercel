@@ -141,11 +141,11 @@ function Gallery({ imageUrls }: { imageUrls: string[] }) {
   return (
     <div className="mb-12 max-w-[520px]">
       {/* 메인 이미지 — 클릭하면 풀스크린 모달 */}
-      <div className="relative rounded-[24px] overflow-hidden bg-[#F8F6F4] aspect-square">
+      <div className="relative rounded-[24px] overflow-hidden bg-[#F8F6F4] max-h-[520px] flex items-center justify-center">
         <img
           src={imageUrls[current]}
           alt={`이미지 ${current + 1}`}
-          className="w-full h-full object-cover block cursor-zoom-in"
+          className="w-full max-h-[520px] object-contain block cursor-zoom-in"
           onClick={() => setModalOpen(true)}
         />
 
