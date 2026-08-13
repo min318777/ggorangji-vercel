@@ -205,7 +205,7 @@ export default function HomePage() {
               Live Activity Feed
             </span>
             <h2 className="text-3xl md:text-4xl font-semibold tracking-[-0.03em]">
-              고양이들의 따뜻한 연결
+              우리 모두의 반려 라이프
             </h2>
           </div>
 
