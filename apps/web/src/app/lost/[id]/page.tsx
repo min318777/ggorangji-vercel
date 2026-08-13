@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import NaverMapView from '@/components/common/NaverMapView';
 import {
-  getLostPost,
+  getLostPostWithView,
   getLostComments,
   postLostComment,
   deleteComment,
@@ -444,21 +444,14 @@ export default function LostDetailPage({ params }: { params: Promise<{ id: strin
     setIsAdmin(localStorage.getItem('role') === 'ROLE_ADMIN');
   }, []);
 
-  // 게시글 조회 + 조회수 증가 (StrictMode 이중 호출 방지)
+  // 게시글 조회 + 조회수 증가 통합 API 호출 (StrictMode 이중 호출 방지)
   useEffect(() => {
+    if (viewIncremented.current) return;
+    viewIncremented.current = true;
     (async () => {
       try {
-        const data = await getLostPost(postId);
+        const data = await getLostPostWithView(postId);
         setPost(data);
-        if (!viewIncremented.current) {
-          viewIncremented.current = true;
-          fetch(
-            `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'}/api/meow/lost-cat/v3/${postId}/view`,
-            { method: 'POST' }
-          )
-            .then(() => setPost((prev) => prev ? { ...prev, view: prev.view + 1 } : prev))
-            .catch(() => {});
-        }
       } catch (e) {
         setPostError(e instanceof Error ? e.message : '게시글을 불러오지 못했습니다.');
       } finally {

@@ -299,6 +299,17 @@ export async function incrementLostView(id: number) {
   );
 }
 
+// 실종글 상세 조회 + 조회수 증가 통합 — POST /api/meow/lost-cat/v3/{id}/view
+export async function getLostPostWithView(id: number): Promise<LostPostDetail> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'}/api/meow/lost-cat/v3/${id}/view`,
+    { method: 'POST' }
+  );
+  if (!res.ok) throw new Error('실종글을 불러오지 못했습니다.');
+  const json: ApiResponse<LostPostDetail> = await res.json();
+  return json.data;
+}
+
 // 실종글 댓글 목록 조회 — GET /api/meow/lost-cat/{postId}/comments (인증 불필요)
 export async function getLostComments(postId: number, page = 0, size = 20) {
   const res = await fetch(
