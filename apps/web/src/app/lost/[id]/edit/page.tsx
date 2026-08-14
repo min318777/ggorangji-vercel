@@ -5,14 +5,17 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import NaverLocationPicker from '@/components/common/NaverLocationPicker';
 import { getLostPost, getPresignedUrls, uploadToS3, updateLostPost } from '@/lib/api/posts';
+import { useFlipAnimation } from '@/hooks/useFlipAnimation';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 const MAX_IMAGES = 10;
 
-interface NewImageFile {
-  file: File;
-  previewUrl: string;
+// 기존 이미지 + 새 이미지를 하나의 순서 리스트로 통합 관리
+interface ImageItem {
   id: string;
+  type: 'existing' | 'new';
+  url: string; // existing: CloudFront URL, new: 미리보기용 objectURL
+  file?: File; // new일 때만 존재
 }
 
 export default function LostEditPage({ params }: { params: Promise<{ id: string }> }) {
@@ -40,15 +43,16 @@ export default function LostEditPage({ params }: { params: Promise<{ id: string 
   const [longitude, setLongitude] = useState<number | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
 
-  // 이미지
-  const [existingUrls, setExistingUrls] = useState<string[]>([]);
-  const [deletedUrls, setDeletedUrls] = useState<string[]>([]);
-  const [newImages, setNewImages] = useState<NewImageFile[]>([]);
+  // 이미지 (기존 + 새 이미지 통합 순서 리스트)
+  const [images, setImages] = useState<ImageItem[]>([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStep, setSubmitStep] = useState('');
   const [error, setError] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  // 이미지 순서 변경 드래그 상태
+  const [dragImageId, setDragImageId] = useState<string | null>(null);
+  const imageGridRef = useFlipAnimation(images.map((img) => img.id));
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -77,7 +81,9 @@ export default function LostEditPage({ params }: { params: Promise<{ id: string 
         setLatitude(data.latitude ?? null);
         setLongitude(data.longitude ?? null);
         setIsCompleted(data.completed);
-        setExistingUrls(data.imageUrls ?? []);
+        setImages(
+          (data.imageUrls ?? []).map((url) => ({ id: url, type: 'existing' as const, url }))
+        );
         setIsLoading(false);
       })
       .catch(() => {
@@ -87,36 +93,46 @@ export default function LostEditPage({ params }: { params: Promise<{ id: string 
   }, [postId, router]);
 
   useEffect(() => {
-    return () => { newImages.forEach((img) => URL.revokeObjectURL(img.previewUrl)); };
-  }, [newImages]);
+    return () => { images.forEach((img) => { if (img.type === 'new') URL.revokeObjectURL(img.url); }); };
+  }, [images]);
 
-  const totalImageCount = existingUrls.length - deletedUrls.length + newImages.length;
-
-  const toggleDeleteExisting = (url: string) => {
-    setDeletedUrls((prev) =>
-      prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url]
-    );
-  };
+  const totalImageCount = images.length;
 
   const addFiles = useCallback((files: FileList | File[]) => {
     const fileArr = Array.from(files).filter((f) => ALLOWED_TYPES.includes(f.type));
-    setNewImages((prev) => {
-      const remaining = MAX_IMAGES - totalImageCount;
+    setImages((prev) => {
+      const remaining = MAX_IMAGES - prev.length;
       if (remaining <= 0) { setError(`이미지는 최대 ${MAX_IMAGES}장까지 가능합니다.`); return prev; }
-      const toAdd = fileArr.slice(0, remaining).map((file) => ({
-        file,
-        previewUrl: URL.createObjectURL(file),
+      const toAdd: ImageItem[] = fileArr.slice(0, remaining).map((file) => ({
         id: `${Date.now()}-${Math.random()}`,
+        type: 'new',
+        url: URL.createObjectURL(file),
+        file,
       }));
       return [...prev, ...toAdd];
     });
     setError('');
-  }, [totalImageCount]);
+  }, []);
 
-  const removeNewImage = useCallback((imgId: string) => {
-    setNewImages((prev) => {
+  // 이미지 순서 변경 (기존/새 이미지 혼합 가능)
+  const reorderImages = useCallback((sourceId: string, targetId: string) => {
+    if (sourceId === targetId) return;
+    setImages((prev) => {
+      const sourceIdx = prev.findIndex((img) => img.id === sourceId);
+      const targetIdx = prev.findIndex((img) => img.id === targetId);
+      if (sourceIdx === -1 || targetIdx === -1) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(sourceIdx, 1);
+      next.splice(targetIdx, 0, moved);
+      return next;
+    });
+  }, []);
+
+  // 이미지 제거 (기존 이미지는 목록에서 빠지면 자동 삭제 처리됨)
+  const removeImage = useCallback((imgId: string) => {
+    setImages((prev) => {
       const target = prev.find((img) => img.id === imgId);
-      if (target) URL.revokeObjectURL(target.previewUrl);
+      if (target?.type === 'new') URL.revokeObjectURL(target.url);
       return prev.filter((img) => img.id !== imgId);
     });
   }, []);
@@ -148,20 +164,26 @@ export default function LostEditPage({ params }: { params: Promise<{ id: string 
     setError('');
 
     try {
-      let newImageKeys: string[] = [];
+      const newImages = images.filter((img) => img.type === 'new');
+      const keyById = new Map<string, string>();
 
       if (newImages.length > 0) {
         setSubmitStep('이미지 업로드 준비 중...');
-        const contentTypes = newImages.map((img) => img.file.type);
+        const contentTypes = newImages.map((img) => img.file!.type);
         const presignedItems = await getPresignedUrls(contentTypes);
         setSubmitStep('이미지 업로드 중...');
         await Promise.all(
-          newImages.map(async (img, idx) => uploadToS3(presignedItems[idx].presignedUrl, img.file))
+          newImages.map(async (img, idx) => uploadToS3(presignedItems[idx].presignedUrl, img.file!))
         );
-        newImageKeys = presignedItems.map((item) => item.key);
+        newImages.forEach((img, idx) => keyById.set(img.id, presignedItems[idx].key));
       }
 
-      const keepImageUrls = existingUrls.filter((url) => !deletedUrls.includes(url));
+      // 화면에 보이는 순서 그대로 최종 이미지 목록 구성
+      const imagePayload = images.map((img) =>
+        img.type === 'existing'
+          ? { type: 'EXISTING' as const, value: img.url }
+          : { type: 'NEW' as const, value: keyById.get(img.id)! }
+      );
 
       setSubmitStep('게시글 수정 중...');
       await updateLostPost(postId, {
@@ -178,9 +200,7 @@ export default function LostEditPage({ params }: { params: Promise<{ id: string 
         latitude: latitude ?? undefined,
         longitude: longitude ?? undefined,
         isCompleted,
-        keepImageUrls,
-        newImageKeys: newImageKeys.length > 0 ? newImageKeys : undefined,
-        deleteImageUrls: deletedUrls.length > 0 ? deletedUrls : undefined,
+        images: imagePayload,
       });
 
       router.push(`/lost/${postId}`);
@@ -287,45 +307,31 @@ export default function LostEditPage({ params }: { params: Promise<{ id: string 
               onChange={(e) => { if (e.target.files) addFiles(e.target.files); e.target.value = ''; }}
             />
 
-            {/* 이미지 미리보기 그리드 (기존 + 새 이미지 통합) */}
-            {(existingUrls.length > 0 || newImages.length > 0) && (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-3">
-                {/* 기존 이미지 */}
-                {existingUrls.map((url) => {
-                  const isDeleted = deletedUrls.includes(url);
-                  return (
-                    <div key={url} className="relative aspect-square rounded-[16px] overflow-hidden group">
-                      <img src={url} alt="기존 이미지" className={`w-full h-full object-cover transition-opacity ${isDeleted ? 'opacity-40' : 'opacity-100'}`} />
-                      {isDeleted && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                          <span className="text-white text-[10px] font-bold">삭제 예정</span>
-                        </div>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => toggleDeleteExisting(url)}
-                        className={`absolute top-1.5 right-1.5 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${
-                          isDeleted ? 'bg-green-500 text-white' : 'bg-black/60 text-white hover:bg-red-500'
-                        }`}
-                      >
-                        {isDeleted ? (
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
-                        ) : (
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                        )}
-                      </button>
-                    </div>
-                  );
-                })}
-
-                {/* 새 이미지 */}
-                {newImages.map((img) => (
-                  <div key={img.id} className="relative aspect-square rounded-[16px] overflow-hidden group">
-                    <img src={img.previewUrl} alt="미리보기" className="w-full h-full object-cover" />
-                    <div className="absolute top-1 left-1 bg-brand text-white text-[9px] px-1.5 py-0.5 rounded-full font-semibold">NEW</div>
+            {/* 이미지 미리보기 그리드 (기존 + 새 이미지 하나의 순서 리스트로 통합) */}
+            {images.length > 0 && (
+              <div ref={imageGridRef} className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-3">
+                {images.map((img) => (
+                  <div
+                    key={img.id}
+                    data-flip-id={img.id}
+                    draggable
+                    onDragStart={() => setDragImageId(img.id)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (dragImageId) reorderImages(dragImageId, img.id);
+                      setDragImageId(null);
+                    }}
+                    onDragEnd={() => setDragImageId(null)}
+                    className={`relative aspect-square rounded-[16px] overflow-hidden group cursor-grab active:cursor-grabbing ${dragImageId === img.id ? 'opacity-40' : ''}`}
+                  >
+                    <img src={img.url} alt={img.type === 'existing' ? '기존 이미지' : '미리보기'} className="w-full h-full object-cover" />
+                    {img.type === 'new' && (
+                      <div className="absolute top-1.5 left-1.5 bg-charcoal text-white text-[9px] px-1.5 py-0.5 rounded-full font-semibold">NEW</div>
+                    )}
                     <button
                       type="button"
-                      onClick={() => removeNewImage(img.id)}
+                      onClick={() => removeImage(img.id)}
                       className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
                     >
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">

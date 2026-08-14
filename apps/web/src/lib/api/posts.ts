@@ -334,13 +334,17 @@ export async function deleteBoastPost(id: number): Promise<void> {
   await apiRequest(`/api/meow/boast-cat/${id}`, { method: 'DELETE' });
 }
 
+// 게시글 수정 시 최종 이미지 순서 항목 (기존/신규 이미지를 하나의 순서 리스트로 표현)
+export interface ImageItemRequest {
+  type: 'EXISTING' | 'NEW';
+  value: string; // EXISTING이면 CloudFront URL, NEW면 S3 key
+}
+
 // 자랑글 수정 — PUT /api/meow/boast-cat/{id} (인증 필요)
 export async function updateBoastPost(id: number, data: {
   title?: string;
   content?: string;
-  keepImageUrls?: string[];
-  newImageKeys?: string[];
-  deleteImageUrls?: string[];
+  images?: ImageItemRequest[];
 }): Promise<void> {
   await apiRequest(`/api/meow/boast-cat/${id}`, {
     method: 'PUT',
@@ -377,9 +381,7 @@ export async function updateLostPost(id: number, data: {
   longitude?: number;
   reward?: number;
   isCompleted?: boolean;
-  keepImageUrls?: string[];
-  newImageKeys?: string[];
-  deleteImageUrls?: string[];
+  images?: ImageItemRequest[];
 }): Promise<void> {
   await apiRequest(`/api/meow/lost-cat/${id}`, {
     method: 'PUT',
