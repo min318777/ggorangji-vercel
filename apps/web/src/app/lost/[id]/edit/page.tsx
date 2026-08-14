@@ -315,7 +315,10 @@ export default function LostEditPage({ params }: { params: Promise<{ id: string 
                     key={img.id}
                     data-flip-id={img.id}
                     draggable
-                    onDragStart={() => setDragImageId(img.id)}
+                    onDragStart={(e) => {
+                      e.dataTransfer.setDragImage(e.currentTarget, e.currentTarget.offsetWidth / 2, e.currentTarget.offsetHeight / 2);
+                      setDragImageId(img.id);
+                    }}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => {
                       e.preventDefault();
