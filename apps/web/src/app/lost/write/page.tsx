@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import NaverLocationPicker from '@/components/common/NaverLocationPicker';
 import { getPresignedUrls, uploadToS3, createLostPost } from '@/lib/api/posts';
+import { useFlipAnimation } from '@/hooks/useFlipAnimation';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 const MAX_IMAGES = 10;
@@ -41,6 +42,9 @@ export default function LostWritePage() {
   const [submitStep, setSubmitStep] = useState('');
   const [error, setError] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  // 이미지 순서 변경 드래그 상태
+  const [dragImageId, setDragImageId] = useState<string | null>(null);
+  const imageGridRef = useFlipAnimation(images.map((img) => img.id));
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -93,6 +97,20 @@ export default function LostWritePage() {
       const target = prev.find((img) => img.id === id);
       if (target) URL.revokeObjectURL(target.previewUrl);
       return prev.filter((img) => img.id !== id);
+    });
+  }, []);
+
+  // 이미지 순서 변경 (드래그 앤 드롭으로 위치 교체)
+  const reorderImages = useCallback((sourceId: string, targetId: string) => {
+    if (sourceId === targetId) return;
+    setImages((prev) => {
+      const sourceIdx = prev.findIndex((img) => img.id === sourceId);
+      const targetIdx = prev.findIndex((img) => img.id === targetId);
+      if (sourceIdx === -1 || targetIdx === -1) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(sourceIdx, 1);
+      next.splice(targetIdx, 0, moved);
+      return next;
     });
   }, []);
 
@@ -253,10 +271,26 @@ export default function LostWritePage() {
               }}
             />
             {images.length > 0 && (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-3">
-                {images.map((img) => (
-                  <div key={img.id} className="relative aspect-square rounded-[16px] overflow-hidden group">
+              <div ref={imageGridRef} className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-3">
+                {images.map((img, i) => (
+                  <div
+                    key={img.id}
+                    data-flip-id={img.id}
+                    draggable
+                    onDragStart={() => setDragImageId(img.id)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (dragImageId) reorderImages(dragImageId, img.id);
+                      setDragImageId(null);
+                    }}
+                    onDragEnd={() => setDragImageId(null)}
+                    className={`relative aspect-square rounded-[16px] overflow-hidden group cursor-grab active:cursor-grabbing ${dragImageId === img.id ? 'opacity-40' : ''}`}
+                  >
                     <img src={img.previewUrl} alt="미리보기" className="w-full h-full object-cover" />
+                    {i === 0 && (
+                      <div className="absolute top-1.5 left-1.5 bg-brand text-white text-[9px] px-1.5 py-0.5 rounded-full font-semibold">썸네일</div>
+                    )}
                     <button
                       type="button"
                       onClick={() => removeImage(img.id)}

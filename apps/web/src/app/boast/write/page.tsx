@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getPresignedUrls, uploadToS3, createBoastPost } from '@/lib/api/posts';
+import { useFlipAnimation } from '@/hooks/useFlipAnimation';
 
 // 허용 이미지 형식
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
@@ -36,6 +37,7 @@ export default function BoastWritePage() {
   const [isDragging, setIsDragging] = useState(false);
   // 이미지 순서 변경 드래그 상태
   const [dragImageId, setDragImageId] = useState<string | null>(null);
+  const imageGridRef = useFlipAnimation(images.map((img) => img.id));
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -268,10 +270,11 @@ export default function BoastWritePage() {
 
             {/* 이미지 미리보기 그리드 */}
             {images.length > 0 && (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-3">
+              <div ref={imageGridRef} className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-3">
                 {images.map((img, i) => (
                   <div
                     key={img.id}
+                    data-flip-id={img.id}
                     draggable
                     onDragStart={() => setDragImageId(img.id)}
                     onDragOver={(e) => e.preventDefault()}

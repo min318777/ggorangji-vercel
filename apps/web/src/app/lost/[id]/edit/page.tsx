@@ -310,7 +310,7 @@ export default function LostEditPage({ params }: { params: Promise<{ id: string 
             {/* 이미지 미리보기 그리드 (기존 + 새 이미지 하나의 순서 리스트로 통합) */}
             {images.length > 0 && (
               <div ref={imageGridRef} className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-3">
-                {images.map((img) => (
+                {images.map((img, i) => (
                   <div
                     key={img.id}
                     data-flip-id={img.id}
@@ -326,8 +326,11 @@ export default function LostEditPage({ params }: { params: Promise<{ id: string 
                     className={`relative aspect-square rounded-[16px] overflow-hidden group cursor-grab active:cursor-grabbing ${dragImageId === img.id ? 'opacity-40' : ''}`}
                   >
                     <img src={img.url} alt={img.type === 'existing' ? '기존 이미지' : '미리보기'} className="w-full h-full object-cover" />
+                    {i === 0 && (
+                      <div className="absolute top-1.5 left-1.5 bg-brand text-white text-[9px] px-1.5 py-0.5 rounded-full font-semibold">썸네일</div>
+                    )}
                     {img.type === 'new' && (
-                      <div className="absolute top-1.5 left-1.5 bg-charcoal text-white text-[9px] px-1.5 py-0.5 rounded-full font-semibold">NEW</div>
+                      <div className="absolute top-1.5 left-1.5 bg-charcoal text-white text-[9px] px-1.5 py-0.5 rounded-full font-semibold" style={i === 0 ? { top: '1.75rem' } : undefined}>NEW</div>
                     )}
                     <button
                       type="button"
