@@ -353,7 +353,7 @@ export default function Header() {
         {/* ===== 비로그인 상태 ===== */}
         {!isLoggedIn && (
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-[13px] font-medium text-gray-500 hover:text-gray-900 transition-colors no-underline hidden sm:block">
+            <Link href="/login" className="text-[13px] font-medium text-gray-500 hover:text-gray-900 transition-colors no-underline">
               로그인
             </Link>
             <Link
