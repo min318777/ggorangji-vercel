@@ -38,6 +38,9 @@ export default function BoastEditPage({ params }: { params: Promise<{ id: string
   const [submitStep, setSubmitStep] = useState('');
   const [error, setError] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  // 이미지 순서 변경 드래그 상태
+  const [dragExistingUrl, setDragExistingUrl] = useState<string | null>(null);
+  const [dragNewImageId, setDragNewImageId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -94,6 +97,34 @@ export default function BoastEditPage({ params }: { params: Promise<{ id: string
     });
     setError('');
   }, [totalImageCount]);
+
+  // 기존 이미지 순서 변경
+  const reorderExisting = useCallback((sourceUrl: string, targetUrl: string) => {
+    if (sourceUrl === targetUrl) return;
+    setExistingUrls((prev) => {
+      const sourceIdx = prev.findIndex((u) => u === sourceUrl);
+      const targetIdx = prev.findIndex((u) => u === targetUrl);
+      if (sourceIdx === -1 || targetIdx === -1) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(sourceIdx, 1);
+      next.splice(targetIdx, 0, moved);
+      return next;
+    });
+  }, []);
+
+  // 새 이미지 순서 변경
+  const reorderNewImages = useCallback((sourceId: string, targetId: string) => {
+    if (sourceId === targetId) return;
+    setNewImages((prev) => {
+      const sourceIdx = prev.findIndex((img) => img.id === sourceId);
+      const targetIdx = prev.findIndex((img) => img.id === targetId);
+      if (sourceIdx === -1 || targetIdx === -1) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(sourceIdx, 1);
+      next.splice(targetIdx, 0, moved);
+      return next;
+    });
+  }, []);
 
   // 새 이미지 제거
   const removeNewImage = useCallback((imgId: string) => {
@@ -270,7 +301,19 @@ export default function BoastEditPage({ params }: { params: Promise<{ id: string
                   const isDeleted = deletedUrls.includes(url);
                   const isThumbnail = i === 0;
                   return (
-                    <div key={url} className="relative aspect-square rounded-[16px] overflow-hidden group">
+                    <div
+                      key={url}
+                      draggable={!isDeleted}
+                      onDragStart={() => setDragExistingUrl(url)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        if (dragExistingUrl) reorderExisting(dragExistingUrl, url);
+                        setDragExistingUrl(null);
+                      }}
+                      onDragEnd={() => setDragExistingUrl(null)}
+                      className={`relative aspect-square rounded-[16px] overflow-hidden group ${!isDeleted ? 'cursor-grab active:cursor-grabbing' : ''} ${dragExistingUrl === url ? 'opacity-40' : ''}`}
+                    >
                       <img src={url} alt="기존 이미지" className={`w-full h-full object-cover transition-opacity ${isDeleted ? 'opacity-40' : 'opacity-100'}`} />
                       {isThumbnail && !isDeleted && (
                         <div className="absolute top-1.5 left-1.5 bg-brand text-white text-[9px] px-1.5 py-0.5 rounded-full font-semibold">썸네일</div>
@@ -299,7 +342,19 @@ export default function BoastEditPage({ params }: { params: Promise<{ id: string
 
                 {/* 새 이미지 */}
                 {newImages.map((img) => (
-                  <div key={img.id} className="relative aspect-square rounded-[16px] overflow-hidden group">
+                  <div
+                    key={img.id}
+                    draggable
+                    onDragStart={() => setDragNewImageId(img.id)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (dragNewImageId) reorderNewImages(dragNewImageId, img.id);
+                      setDragNewImageId(null);
+                    }}
+                    onDragEnd={() => setDragNewImageId(null)}
+                    className={`relative aspect-square rounded-[16px] overflow-hidden group cursor-grab active:cursor-grabbing ${dragNewImageId === img.id ? 'opacity-40' : ''}`}
+                  >
                     <img src={img.previewUrl} alt="미리보기" className="w-full h-full object-cover" />
                     <div className="absolute top-1 left-1 bg-brand text-white text-[9px] px-1.5 py-0.5 rounded-full font-semibold">NEW</div>
                     <button

@@ -34,6 +34,8 @@ export default function BoastWritePage() {
 
   // 드래그 앤 드롭 상태
   const [isDragging, setIsDragging] = useState(false);
+  // 이미지 순서 변경 드래그 상태
+  const [dragImageId, setDragImageId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -82,6 +84,20 @@ export default function BoastWritePage() {
       return [...prev, ...toAdd];
     });
     setError('');
+  }, []);
+
+  // 이미지 순서 변경 (드래그 앤 드롭으로 위치 교체)
+  const reorderImages = useCallback((sourceId: string, targetId: string) => {
+    if (sourceId === targetId) return;
+    setImages((prev) => {
+      const sourceIdx = prev.findIndex((img) => img.id === sourceId);
+      const targetIdx = prev.findIndex((img) => img.id === targetId);
+      if (sourceIdx === -1 || targetIdx === -1) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(sourceIdx, 1);
+      next.splice(targetIdx, 0, moved);
+      return next;
+    });
   }, []);
 
   // 이미지 제거
@@ -254,7 +270,19 @@ export default function BoastWritePage() {
             {images.length > 0 && (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-3">
                 {images.map((img, i) => (
-                  <div key={img.id} className="relative aspect-square rounded-[16px] overflow-hidden group">
+                  <div
+                    key={img.id}
+                    draggable
+                    onDragStart={() => setDragImageId(img.id)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (dragImageId) reorderImages(dragImageId, img.id);
+                      setDragImageId(null);
+                    }}
+                    onDragEnd={() => setDragImageId(null)}
+                    className={`relative aspect-square rounded-[16px] overflow-hidden group cursor-grab active:cursor-grabbing ${dragImageId === img.id ? 'opacity-40' : ''}`}
+                  >
                     <img
                       src={img.previewUrl}
                       alt="미리보기"
