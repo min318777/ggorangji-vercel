@@ -95,6 +95,15 @@ export async function withdrawUser(): Promise<void> {
   await apiRequest('/api/users/me', { method: 'DELETE' });
 }
 
+// 닉네임 변경 — PATCH /api/users/me
+export async function updateNickname(nickname: string): Promise<MyPageSummary> {
+  const res = await apiRequest<ApiResponse<MyPageSummary>>('/api/users/me', {
+    method: 'PATCH',
+    body: JSON.stringify({ nickname }),
+  });
+  return res.data;
+}
+
 // 내가 좋아요한 글 조회 — GET /api/users/me/liked-posts
 export async function getMyLikedPosts(
   page = 0,

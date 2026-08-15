@@ -400,25 +400,62 @@ function AdminPanel() {
 }
 
 // ===== 계정 설정 패널 =====
-function SettingsPanel({ summary }: { summary: MyPageSummary }) {
+function SettingsPanel({
+  summary,
+  onNicknameChanged,
+}: {
+  summary: MyPageSummary;
+  onNicknameChanged: (summary: MyPageSummary) => void;
+}) {
   const [nickname, setNickname] = useState(summary.nickname ?? '');
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState('');
 
+  // 닉네임 중복 확인 상태: null=미확인, true=사용가능, false=중복
+  const [checkResult, setCheckResult] = useState<boolean | null>(null);
+  const [isChecking, setIsChecking] = useState(false);
+
+  const isUnchanged = nickname.trim() === summary.nickname;
+  const isValidFormat = /^[가-힣a-zA-Z0-9]{2,10}$/.test(nickname.trim());
+
+  const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNickname(e.target.value);
+    setCheckResult(null);
+    setMessage('');
+  };
+
+  const handleCheck = async () => {
+    if (!isValidFormat) return;
+    setIsChecking(true);
+    setMessage('');
+    try {
+      const { checkNickname } = await import('@/lib/api/auth');
+      const available = await checkNickname(nickname.trim());
+      setCheckResult(available);
+    } catch {
+      setCheckResult(null);
+      setMessage('중복 확인 중 오류가 발생했습니다.');
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nickname.trim()) return;
+    if (!isValidFormat || checkResult !== true) return;
     setIsSaving(true);
     setMessage('');
     try {
-      const { apiRequest } = await import('@/lib/api/client');
-      await apiRequest('/api/users/me', {
-        method: 'PATCH',
-        body: JSON.stringify({ nickname: nickname.trim() }),
-      });
+      const { updateNickname } = await import('@/lib/api/user');
+      const updated = await updateNickname(nickname.trim());
+      onNicknameChanged(updated);
+      // 헤더는 localStorage 캐시를 읽으므로 갱신 후 storage 이벤트로 동기화
+      localStorage.setItem('nickname', updated.nickname);
+      window.dispatchEvent(new StorageEvent('storage', { key: 'nickname' }));
+      setCheckResult(null);
       setMessage('닉네임이 변경되었습니다.');
-    } catch {
-      setMessage('저장에 실패했습니다. 다시 시도해 주세요.');
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : '저장에 실패했습니다. 다시 시도해 주세요.');
     } finally {
       setIsSaving(false);
     }
@@ -432,29 +469,47 @@ function SettingsPanel({ summary }: { summary: MyPageSummary }) {
           <label className="block text-[13px] font-semibold mb-2 opacity-60">로그인 ID</label>
           <input
             type="text"
-            value={summary.loginId}
+            value={summary.loginId || '소셜 로그인 계정'}
             disabled
             className="w-full px-5 py-3 bg-black/5 rounded-[16px] text-[14px] opacity-50 cursor-not-allowed outline-none"
           />
         </div>
         <div>
           <label className="block text-[13px] font-semibold mb-2">닉네임</label>
-          <input
-            type="text"
-            value={nickname}
-            readOnly
-            disabled
-            className="w-full px-5 py-3 bg-black/[0.03] border border-black/[0.06] rounded-[16px] text-[14px] outline-none text-black/40 cursor-not-allowed"
-          />
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={nickname}
+              onChange={handleNicknameChange}
+              placeholder="2~10자 한글/영문/숫자"
+              className="flex-1 px-5 py-3 bg-black/[0.03] border border-black/[0.06] rounded-[16px] text-[14px] outline-none focus:border-brand transition-colors"
+            />
+            <button
+              type="button"
+              onClick={handleCheck}
+              disabled={isChecking || !isValidFormat || isUnchanged}
+              className="shrink-0 px-4 rounded-[16px] text-[13px] font-semibold bg-charcoal text-white hover:bg-brand transition-colors disabled:opacity-40 disabled:cursor-not-allowed border-none cursor-pointer"
+            >
+              {isChecking ? '확인 중' : '중복 확인'}
+            </button>
+          </div>
+          {nickname.trim() && !isValidFormat && (
+            <p className="text-[11px] mt-2 text-red-500">닉네임은 2~10자 한글/영문/숫자만 가능합니다.</p>
+          )}
+          {isValidFormat && !isUnchanged && checkResult !== null && (
+            <p className={`text-[11px] mt-2 ${checkResult ? 'text-green-500' : 'text-red-500'}`}>
+              {checkResult ? '사용 가능한 닉네임입니다.' : '이미 사용 중인 닉네임입니다.'}
+            </p>
+          )}
         </div>
         {message && (
-          <p className={`text-[13px] ${message.includes('실패') ? 'text-red-500' : 'text-green-600'}`}>
+          <p className={`text-[13px] ${message.includes('실패') || message.includes('오류') ? 'text-red-500' : 'text-green-600'}`}>
             {message}
           </p>
         )}
         <button
           type="submit"
-          disabled={isSaving || !nickname.trim()}
+          disabled={isSaving || isUnchanged || !isValidFormat || checkResult !== true}
           className="h-[54px] bg-charcoal text-white rounded-full font-semibold text-[15px] hover:bg-brand transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed border-none cursor-pointer"
         >
           {isSaving ? '저장 중...' : '저장하기'}
@@ -801,7 +856,7 @@ export default function MyPage() {
             )}
 
             {/* ===== 계정 설정 탭 ===== */}
-            {sidebarTab === 'settings' && <SettingsPanel summary={summary} />}
+            {sidebarTab === 'settings' && <SettingsPanel summary={summary} onNicknameChanged={setSummary} />}
 
             {/* ===== 유저 관리 탭 (관리자 전용) ===== */}
             {sidebarTab === 'admin' && isAdmin && <AdminPanel />}
