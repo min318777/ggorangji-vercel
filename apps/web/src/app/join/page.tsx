@@ -4,6 +4,7 @@ import { useState, FormEvent, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { join, checkLoginId, checkNickname } from '@/lib/api/auth';
+import KakaoLoginButton from '@/components/common/KakaoLoginButton';
 
 // 폼 필드 타입 정의
 interface FormData {
@@ -273,6 +274,15 @@ export default function JoinPage() {
                 )}
               </button>
             </form>
+
+            {/* 소셜 로그인 구분선 */}
+            <div className="flex items-center gap-3 my-6">
+              <div className="flex-1 h-px bg-gray-200" />
+              <span className="text-[12px] opacity-40">또는</span>
+              <div className="flex-1 h-px bg-gray-200" />
+            </div>
+
+            <KakaoLoginButton />
 
             {/* 로그인 링크 */}
             <div className="mt-8 text-center text-[14px] opacity-60">

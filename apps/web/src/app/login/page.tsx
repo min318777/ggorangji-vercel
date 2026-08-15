@@ -4,6 +4,7 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { login } from '@/lib/api/auth';
+import KakaoLoginButton from '@/components/common/KakaoLoginButton';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -105,6 +106,15 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+
+          {/* 소셜 로그인 구분선 */}
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-[12px] opacity-40">또는</span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+
+          <KakaoLoginButton />
 
           {/* 회원가입 링크 */}
           <div className="mt-8 text-center text-[13px] opacity-80">
