@@ -64,7 +64,7 @@ export default function LoginPage() {
                 type="text"
                 value={loginId}
                 onChange={(e) => setLoginId(e.target.value)}
-                placeholder="5~20자 영문/숫자 (예: catlover01)"
+                placeholder="5~20자 영문/숫자"
                 required
                 autoComplete="username"
                 className="w-full bg-gray-50 border border-gray-200 px-5 py-4 rounded-2xl text-[15px] outline-none transition-all duration-300 focus:bg-white focus:border-brand focus:shadow-[0_0_0_4px_rgba(232,131,58,0.1)] placeholder:text-black/30"
@@ -78,7 +78,7 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="영문+숫자 필수 포함"
+                placeholder="영문/숫자 8자 이상"
                 required
                 autoComplete="current-password"
                 className="w-full bg-gray-50 border border-gray-200 px-5 py-4 rounded-2xl text-[15px] outline-none transition-all duration-300 focus:bg-white focus:border-brand focus:shadow-[0_0_0_4px_rgba(232,131,58,0.1)] placeholder:text-black/30"
