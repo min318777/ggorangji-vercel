@@ -228,7 +228,7 @@ function UserCard({
           isAdminUser ? 'bg-brand/20 text-brand' :
           'bg-black/10 text-charcoal'
         }`}>
-          {user.loginId.charAt(0).toUpperCase()}
+          {(user.nickname || user.loginId || '?').charAt(0).toUpperCase()}
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -634,7 +634,7 @@ export default function MyPage() {
               <div className="flex items-center gap-6">
                 {/* 이니셜 아바타 */}
                 <div className="w-20 h-20 rounded-[30px] bg-brand/20 flex items-center justify-center text-brand font-bold text-[32px] flex-shrink-0">
-                  {summary.loginId.charAt(0).toUpperCase()}
+                  {(summary.nickname || summary.loginId || '?').charAt(0).toUpperCase()}
                 </div>
                 <div>
                   <h2 className="text-[24px] font-semibold mb-1">{summary.nickname || summary.loginId}</h2>
