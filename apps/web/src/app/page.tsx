@@ -98,11 +98,11 @@ export default function HomePage() {
         <section className="pt-16 md:pt-[120px] pb-16 md:pb-20 text-center">
 <h1 className="text-4xl md:text-6xl lg:text-[72px] font-semibold leading-[1.1] tracking-[-0.04em] mb-8 md:mb-10">
             반려동물과의 소중한 순간,<br />
-            서로 공유하며 함께 지켜가는 공간.
+            서로 공유하며 함께 지켜가는 공간
           </h1>
           <p className="max-w-[600px] mx-auto opacity-60 leading-relaxed text-base md:text-lg px-4">
             매일매일 반려동물과의 소중한 순간을 기록하고,<br className="hidden md:block" />
-            전국의 집사들과 함께 실종 가족을 되찾는 든든한 연결.
+            전국의 집사들과 함께 실종 가족을 되찾는 든든한 연결
           </p>
         </section>
 
@@ -189,10 +189,10 @@ export default function HomePage() {
 
             {/* 정보 카드 (흰 배경) */}
             <div className="flex-1 rounded-[40px] md:rounded-[48px] bg-white p-8 md:p-10 flex flex-col justify-center border border-black/[0.03] min-h-[200px]">
-              <h3 className="text-xl md:text-2xl mb-3">근처 반려인에게 바로 전달</h3>
+              <h3 className="text-xl md:text-2xl mb-3">내 주변 실종 신고, 한눈에</h3>
               <p className="opacity-60 text-sm leading-relaxed">
-                실종 신고가 등록되면 주변 지역의 반려인들에게
-                실시간으로 알림이 전송됩니다.
+                반려동물이 실종되면 위치 기반으로 주변 지역의
+                실종 신고를 바로 찾아볼 수 있어요.
               </p>
             </div>
           </div>
@@ -245,7 +245,7 @@ export default function HomePage() {
         <section className="py-24 md:py-40 text-center">
           <h2 className="text-3xl md:text-5xl lg:text-[56px] font-semibold mb-8 md:mb-10 tracking-[-0.04em] leading-[1.2]">
             반려동물을 사랑하는 모든 집사들의<br className="hidden md:block" />
-            든든한 커뮤니티.
+            든든한 커뮤니티
           </h2>
           <Link
             href={isLoggedIn ? '/boast' : '/join'}
