@@ -556,9 +556,13 @@ export default function MyPage() {
     setIsWithdrawing(true);
     try {
       await withdrawUser();
+      // nickname/loginId/userId까지 지워야 함 — 안 지우면 재로그인 후에도 헤더에 탈퇴 전 캐시된 닉네임이 그대로 보임
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('role');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('loginId');
+      localStorage.removeItem('nickname');
       router.replace('/login');
     } catch {
       alert('탈퇴 처리에 실패했습니다. 다시 시도해 주세요.');
