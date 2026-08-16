@@ -563,6 +563,8 @@ export default function MyPage() {
       localStorage.removeItem('userId');
       localStorage.removeItem('loginId');
       localStorage.removeItem('nickname');
+      // storage 이벤트는 같은 탭에서 자동 발화하지 않으므로 수동 dispatch → 헤더가 즉시 로그아웃 상태로 갱신됨
+      window.dispatchEvent(new StorageEvent('storage', { key: 'accessToken' }));
       router.replace('/login');
     } catch {
       alert('탈퇴 처리에 실패했습니다. 다시 시도해 주세요.');

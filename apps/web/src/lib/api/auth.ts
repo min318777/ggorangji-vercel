@@ -71,6 +71,8 @@ export async function logout(): Promise<void> {
     localStorage.removeItem('role');
     localStorage.removeItem('loginId');
     localStorage.removeItem('nickname');
+    // storage 이벤트는 같은 탭에서 자동 발화하지 않으므로 수동 dispatch → 헤더 syncAuth 트리거
+    window.dispatchEvent(new StorageEvent('storage', { key: 'accessToken' }));
   }
 }
 
