@@ -380,7 +380,7 @@ export async function updateLostPost(id: number, data: {
   latitude?: number;
   longitude?: number;
   reward?: number;
-  isCompleted?: boolean;
+  completed?: boolean; // 백엔드 Jackson 프로퍼티명이 isCompleted가 아닌 completed (Lombok isXxx 게터 규칙)
   images?: ImageItemRequest[];
 }): Promise<void> {
   await apiRequest(`/api/meow/lost-cat/${id}`, {

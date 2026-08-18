@@ -199,7 +199,7 @@ export default function LostEditPage({ params }: { params: Promise<{ id: string 
         lostLocation: lostLocation.trim() || undefined,
         latitude: latitude ?? undefined,
         longitude: longitude ?? undefined,
-        isCompleted,
+        completed: isCompleted,
         images: imagePayload,
       });
 
