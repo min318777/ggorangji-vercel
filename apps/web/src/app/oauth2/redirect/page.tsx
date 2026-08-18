@@ -18,6 +18,9 @@ function OAuth2RedirectContent() {
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('userId', userId);
       localStorage.setItem('role', role);
+      // 이전 계정의 캐시된 정보 제거 — 없으면 Header가 새 정보로 다시 불러옴
+      localStorage.removeItem('loginId');
+      localStorage.removeItem('nickname');
       // storage 이벤트는 같은 탭에서 자동 발화하지 않으므로 수동 dispatch → 헤더 syncAuth 트리거
       window.dispatchEvent(new StorageEvent('storage', { key: 'accessToken' }));
     }

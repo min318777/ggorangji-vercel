@@ -34,6 +34,8 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
     localStorage.setItem('role', result.role);
     // 헤더 표시용으로 loginId도 저장 (서버 응답에 없으므로 요청값 그대로 저장)
     localStorage.setItem('loginId', data.loginId);
+    // 이전 계정의 캐시된 닉네임 제거 — 없으면 Header가 새 닉네임을 다시 불러옴
+    localStorage.removeItem('nickname');
     // storage 이벤트는 같은 탭에서 자동 발화하지 않으므로 수동 dispatch → 헤더 syncAuth 트리거
     window.dispatchEvent(new StorageEvent('storage', { key: 'accessToken' }));
   }
