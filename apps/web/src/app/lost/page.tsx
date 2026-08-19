@@ -99,6 +99,8 @@ function ElapsedBadge({ ms }: { ms: number }) {
 const MAX_PAGES = 50;
 const BLOCK_SIZE = 10;
 const PAGE_SIZE = 28;
+// PC는 GPS가 없어 고정밀 모드가 오히려 느림, 1분 이내 캐시된 위치는 재사용
+const GEOLOCATION_OPTIONS: PositionOptions = { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 };
 
 function Pagination({
   currentPage,
@@ -256,7 +258,8 @@ export default function LostPage() {
       () => {
         setNearbyError('위치 권한이 거부되었습니다. 브라우저 설정에서 위치 접근을 허용해 주세요.');
         setNearbyLoading(false);
-      }
+      },
+      GEOLOCATION_OPTIONS
     );
   }, [myLocation]);
 
@@ -302,7 +305,8 @@ export default function LostPage() {
       () => {
         setNearbyStError('위치 권한이 거부되었습니다. 브라우저 설정에서 위치 접근을 허용해 주세요.');
         setNearbyStLoading(false);
-      }
+      },
+      GEOLOCATION_OPTIONS
     );
   }, [myLocation]);
 
