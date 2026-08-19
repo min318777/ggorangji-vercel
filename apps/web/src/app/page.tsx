@@ -2,38 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-
-// 게시글 카드 데이터
-const POST_CARDS = [
-  {
-    image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=600',
-    pill: 'Cat • 3 years',
-    title: '루이의 행복한 오후',
-    meta: '2.4k Likes • Today',
-    offset: false,
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&q=80&w=600',
-    pill: 'Dog • Golden Retriever',
-    title: '햇살 아래 댕댕이',
-    meta: '1.1k Likes • 2h ago',
-    offset: true,
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1495360010541-f48722b34f7d?auto=format&fit=crop&q=80&w=600',
-    pill: 'Cat • 2 years',
-    title: '공원 산책 데이',
-    meta: '892 Purrs • 5h ago',
-    offset: false,
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&q=80&w=600',
-    pill: 'Dog • Shiba Inu',
-    title: '집사와 함께하는 휴일',
-    meta: '4.2k Purrs • 12h ago',
-    offset: true,
-  },
-];
+import { getBoastPosts, type BoastPostItem } from '@/lib/api/posts';
+import { formatDate, formatCount } from '@/lib/format';
 
 // 실시간 알림 토스트 데이터
 const NOTIFICATIONS = [
@@ -59,7 +29,7 @@ const NOTIFICATIONS = [
 
 export default function HomePage() {
   // 카드 요소에 대한 ref 배열 (마우스 패럴랙스 효과용)
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
 
   // 로그인 상태 (CTA 버튼 분기용)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -68,6 +38,22 @@ export default function HomePage() {
     syncAuth();
     window.addEventListener('storage', syncAuth);
     return () => window.removeEventListener('storage', syncAuth);
+  }, []);
+
+  // 일상공유(자랑글) 최신글 4개
+  const [recentPosts, setRecentPosts] = useState<BoastPostItem[]>([]);
+  const [isRecentLoading, setIsRecentLoading] = useState(true);
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getBoastPosts(0, 4);
+        setRecentPosts(data.content);
+      } catch {
+        setRecentPosts([]);
+      } finally {
+        setIsRecentLoading(false);
+      }
+    })();
   }, []);
 
   // 마우스 위치에 따라 카드를 살짝 움직이는 패럴랙스 효과
@@ -113,37 +99,45 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ===== 게시글 카드 그리드 ===== */}
+        {/* ===== 게시글 카드 그리드 (일상공유 최신글 4개) ===== */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-8">
-          {POST_CARDS.map((card, i) => (
-            <div
-              key={i}
-              ref={(el) => { cardRefs.current[i] = el; }}
+          {isRecentLoading
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="animate-pulse aspect-[1/1.1] bg-black/5 rounded-[32px] md:rounded-[48px]" />
+              ))
+            : recentPosts.map((post, i) => (
+            <Link
+              key={post.id}
+              href={`/boast/${post.id}`}
+              ref={(el: HTMLAnchorElement | null) => { cardRefs.current[i] = el; }}
               className={`
-                relative overflow-hidden rounded-[32px] md:rounded-[48px]
-                aspect-[1/1.1] cursor-default
+                group block relative overflow-hidden rounded-[32px] md:rounded-[48px]
+                aspect-[1/1.1] no-underline
                 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]
                 hover:-translate-y-2 hover:scale-[1.02]
-                ${card.offset ? 'translate-y-10' : ''}
+                ${i % 2 === 1 ? 'translate-y-10' : ''}
               `}
             >
               {/* 카드 배경 이미지 */}
-              <img
-                src={card.image}
-                alt={card.title}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-              />
+              {post.thumbnailUrl ? (
+                <img
+                  src={post.thumbnailUrl}
+                  alt={post.title}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-orange-100" />
+              )}
               {/* 그라디언트 오버레이 */}
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 z-10" />
               {/* 카드 텍스트 */}
               <div className="absolute inset-0 p-5 md:p-8 flex flex-col justify-end text-white z-20">
-                <div className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-semibold uppercase w-fit mb-2">
-                  {card.pill}
+                <h3 className="text-base md:text-xl font-semibold mb-1 line-clamp-2">{post.title}</h3>
+                <div className="text-xs opacity-80">
+                  {formatCount(post.likeCount)} Likes • {formatDate(post.createdAt)}
                 </div>
-                <h3 className="text-base md:text-xl font-semibold mb-1">{card.title}</h3>
-                <div className="text-xs opacity-80">{card.meta}</div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
