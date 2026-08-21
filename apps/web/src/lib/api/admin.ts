@@ -17,12 +17,12 @@ export interface AdminUserItem {
   registeredAt: string;
 }
 
-// Spring Data Page<T> 기본 직렬화 구조
+// 백엔드 PageResponse<T> 직렬화 구조
 export interface AdminUserPage {
   content: AdminUserItem[];
   totalElements: number;
   totalPages: number;
-  number: number; // 현재 페이지 (0-indexed)
+  page: number; // 현재 페이지 (0-indexed)
   size: number;
 }
 

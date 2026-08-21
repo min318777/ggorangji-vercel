@@ -297,7 +297,7 @@ function AdminPanel() {
     try {
       const res = await getAdminUsers(role || undefined, page, 10);
       setUsers(res.content);
-      setCurrentPage(res.number);
+      setCurrentPage(res.page);
       setTotalPages(res.totalPages);
       setTotalElements(res.totalElements);
     } catch { /* 조용히 실패 */ }

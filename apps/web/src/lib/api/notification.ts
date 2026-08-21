@@ -30,7 +30,7 @@ interface PageData<T> {
   totalElements: number;
   totalPages: number;
   size: number;
-  number: number;
+  page: number;
 }
 
 // 알림 목록 조회 — GET /api/notifications
@@ -38,7 +38,7 @@ export async function getNotifications(page = 0, size = 10) {
   const res = await apiRequest<ApiResponse<PageData<NotificationItem>>>(
     `/api/notifications?page=${page}&size=${size}`
   );
-  return res.data ?? { content: [], totalElements: 0, totalPages: 0, size, number: 0 };
+  return res.data ?? { content: [], totalElements: 0, totalPages: 0, size, page: 0 };
 }
 
 // 단일 알림 읽음 처리 — PATCH /api/notifications/{id}/read
