@@ -91,7 +91,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-brand text-white py-5 rounded-full text-base font-semibold flex justify-center items-center gap-3 hover:-translate-y-0.5 hover:shadow-[0_10px_20px_rgba(232,131,58,0.2)] transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full bg-charcoal text-white py-5 rounded-full text-base font-semibold flex justify-center items-center gap-3 hover:bg-brand hover:-translate-y-0.5 hover:shadow-[0_10px_20px_rgba(232,131,58,0.2)] transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
             >
               {isLoading ? (
                 '로그인 중...'
